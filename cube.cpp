@@ -35,10 +35,10 @@ int wordCount = 0;
 //multithread
 //write real makefile
 //cleanup/make more c++y
-int copyNeighbs(int sheet, int cube, int offset) {
+int copyNeighbs(int sheet, int cube) {
 	int i;
 	for (i = 0; i < 8 && cub[cube%16][i] >= 0; i++) {
-		cubbies[cube].neighb[i+offset] = cub[cube%16][i] + (sheet*16);
+		cubbies[cube].neighb.push_back(cub[cube%16][i] + (sheet*16));
 	}
 	return i;
 }
@@ -47,6 +47,30 @@ int copyNeighbs(int sheet, int cube, int offset) {
 void SetNeighbors() {
 	//sorry this feels super hacky but my brain won't brain better
 	for (int i = 0; i < 4; i++){
+		for (int j = 0; j < 16; j++) {
+			copyNeighbs(i,16*i+j);
+			switch(i) {
+				case 0:
+					cubbies[j].neighb.push_back(16+j);
+					copyNeighbs(1,j);
+					break;
+				case 1:
+				case 2:
+					cubbies[16*i+j].neighb.push_back(16*(i+1)+j);
+					cubbies[16*i+j].neighb.push_back(16*(i-1)+j);
+					copyNeighbs(i+1, 16*i+j);
+					copyNeighbs(i-1, 16*i+j);
+					break;
+				case 3:
+					cubbies[48+j].neighb.push_back(32+j);
+					copyNeighbs(2,48+j);
+					break;
+				default:
+					std::cout << "We've got problems...";
+			}
+		}
+	}
+	/*for (int i = 0; i < 4; i++){
 		for (int j = 0; j < 16; j++) {
 			int offset = copyNeighbs(i,16*i+j,0);
 			switch(i) {
@@ -70,11 +94,11 @@ void SetNeighbors() {
 			}
 		}
 	}
-	/*
+	
 	TODO: make vectors?
 	for (int i = 0; i < 64; i++) {
 		std::cout << i << ": ";
-		for (int j = 0; j<26; j++) {
+		for (int j = 0; j<cubbies[i].neighb.size(); j++) {
 			std::cout << cubbies[i].neighb[j] << " ";
 		}
 		std::cout << std::endl;
@@ -132,16 +156,18 @@ int DFS(std::string word) {
 	    }
 	    
     	bool deadEnd = true;
-    	for (int i = 0; i < 26 && cubbies[v].neighb[i] != -1; i++) {
+    	int size = cubbies[v].neighb.size();
+    	for (int i = 0; i < size; i++) {
     		int n = cubbies[v].neighb[i];
     		if (cubbies[n].letter == word[cubbies[v].index+1] && !cubbies[n].used) {
     			deadEnd = false;
+    			cubbies[n].used = true;
     			cubbies[n].index = cubbies[v].index+1;
     			s.push(n);
     		} 
     	}
-    	if (!deadEnd) {
-    		cubbies[v].used = true;
+    	if (deadEnd) {
+    		cubbies[v].used = false;
     	}
 	    
 	}
