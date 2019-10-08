@@ -4,39 +4,16 @@
 #include <unordered_map>
 #include <vector>
 #include <stack>
-#include <forward_list>
+#include <list>
 #include <algorithm>
+#include <tuple>
 #include "cube.h"
 
 std::unordered_set<std::string> words;
 struct Cubbie cubbies[64];
 std::unordered_map<char, std::vector<int>> letterMap;
 int wordCount = 0;
-//Cubbie struct:
-//char sym
-//int neighb[26]
-//int used?
-//int visited?
 
-//cube structs:
-//  64 element array of Cubbie structs
-//  map of (char letter, int occurences[64]) 
-
-//words: read in as set
-
-//DONE:
-//first try at algorithm
-//environment setup
-//read in files
-//create data structures
-//make neighbor mapping
-
-//TODO:
-//dfs on words
-//test against example
-//multithread
-//write real makefile
-//cleanup/make more c++y
 int copyNeighbs(int sheet, int cube) {
 	int i;
 	for (i = 0; i < 8 && cub[cube%16][i] >= 0; i++) {
@@ -95,108 +72,111 @@ int ReadCube(FILE *f_c) {
 	return 0;
 }
 
-void Alg(std::string word) {
-	std::forward_list<std::vector<int>> paths;
+void BFS(std::string word) {
+	std::list<std::vector<int>> paths;
 	
 	std::vector<int> tempVec;
 	try {
-		std::vector<int> tempVec(letterMap.at(word[0]));
+		tempVec = (letterMap.at(word[0]));
 	}
 	catch(const std::out_of_range &e) {
 		//first letter of word does not exist in cube
 		return;
 	}
+	std::cout << "tempVec: ";
+	for (int i = 0; i < tempVec.size(); i++)
+			std::cout << tempVec[i] << " ";
+		std::cout << std::endl;
 	std::vector<int>::iterator itr;
 	for (itr = tempVec.begin(); itr != tempVec.end(); itr++) {
 		//push all first letters into paths
-		cubbies[*itr].index = 0;
 		std::vector<int> first(*itr);
 		paths.push_front(first);
 	}
-	for (int w = 0; w < word.size(); w++) {
-		std::forward_list<std::vector<int>>::iterator p;
-		for (p = paths.begin(); p != paths.end(); p++) {
+	std::cout << word << std::endl;
+	for (int w = 1; w < word.size(); w++) {
+		std::list<std::vector<int>>::iterator p;
+		for (auto p = paths.begin(); p != paths.end(); ) {
 			//number of paths could change with every iteration of w
-			for (int n = 0; n < cubbies[(*p).back()].neighb.size(); n++) {
+			//std::cout << cubbies[(*p).back()].neighb.size() << std::endl;
+			int neighbSize = cubbies[(*p).back()].neighb.size();
+			for (int n = 0; n < neighbSize; n++) {
+				for (int i = 0; i < (*p).size(); i++)
+					std::cout << (*p)[i] << " ";
+				std::cout << std::endl;
 				//check each neighbor of the last node of the path 
 				int ni = cubbies[(*p).back()].neighb[n];
 				if (cubbies[ni].letter = word[w]) {
 					//check if this cubbie has already been used in this path
 					std::vector<int>::iterator it = std::find((*p).begin(), (*p).end(), ni);
-					if (it != (*p).end()) {
+					if (it == (*p).end()) {
 						std::vector<int> newPath(*p);
+						//add new cubbies to back of path
 						newPath.push_back(ni);
+						//add new paths to the front of list
 						paths.push_front(newPath);
-						p++;
 					}
-				} 
+				}
 			}
-			
-			paths.remove((*p));
-			p--;
-			//delete p
-			//p = p-1
+			//old path is too short now and has been replaced (maybe) by new paths: delete p
+			//erase returns iterator to next element: this is how we advance p
+			p = paths.erase(p);
 		}
+		std::cout << "finished pi " << std::endl;
+
 	}
+	std::cout << "ending" << std::endl;
 	if (!paths.empty()) {
+		std::cout << word << " found\n";
 		wordCount++;
 	}
 }
 
-int DFS(std::string word) {
-	//S is a stack
-	//push all cubes in letterMap.second to S
-	//while S is not empty:
-	//	v = S.pop
-	//	if v.index == word.size()-1
-	//		word is in cube
-	//	if v is not used 
-	//		v = used
-	//		for all n in cubbies[v].neighb
-	//			if n.letter = word[v.index+1] 
-	//				n.index = v.index+1
-	//				S.push(n)
-	std::stack<int> s;
-	std::vector<int>::iterator itr;
+void DFS2(std::string word) {
+	std::stack<std::tuple<int, int>> paths;
+	std::vector<int> used;
 	std::vector<int> tempVec;
 	try {
-		tempVec = letterMap.at(word[0]);
+		tempVec = (letterMap.at(word[0]));
 	}
 	catch(const std::out_of_range &e) {
 		//first letter of word does not exist in cube
-		return -1;
+		return;
 	}
+
+	std::vector<int>::iterator itr;
 	for (itr = tempVec.begin(); itr != tempVec.end(); itr++) {
-		cubbies[*itr].index = 0;
-		s.push(*itr);
+		//push all first letters into paths
+		std::tuple<int, int> first(*itr, 0);
+		paths.push(first);
 	}
-	while(!s.empty()) {
-		int v = s.top();
-	    s.pop();
-	    if (cubbies[v].index == word.size()-1) {
-	    	//word has been found in cube
-	    	wordCount++;
-	    	//reset used values?
-	    	return 0;
-	    }
-	    
-    	bool deadEnd = true;
-    	int size = cubbies[v].neighb.size();
-    	for (int i = 0; i < size; i++) {
-    		int n = cubbies[v].neighb[i];
-    		if (cubbies[n].letter == word[cubbies[v].index+1] && !cubbies[n].used) {
-    			deadEnd = false;
-    			cubbies[n].used = true;
-    			cubbies[n].index = cubbies[v].index+1;
-    			s.push(n);
-    		} 
-    	}
-    	if (deadEnd) {
-    		cubbies[v].used = false;
-    	}
-	    
+	while (!paths.empty()) {
+		std::tuple<int,int> node = paths.top();
+		paths.pop();
+		if (cubbies[std::get<0>(node)].letter == word[std::get<1>(node)]) {
+			bool alreadyUsed = false;
+			for (int i = 0; i <= std::get<1>(node)-1; i++) {
+				if (used[i] == std::get<0>(node)) {
+					alreadyUsed = true;
+				}
+			}
+			//std::vector<int>::iterator it = std::find(used.begin(), used[std::get<1>(node)], std::get<0>(node));
+			if (!alreadyUsed) {
+				if (std::get<1>(node) == word.size()-1){
+					wordCount++;
+					return;
+				}
+				used.push_back(std::get<0>(node));
+				for (int i = 0; i < cubbies[std::get<0>(node)].neighb.size(); i++) {
+					std::tuple<int,int> newTup = std::make_tuple(cubbies[std::get<0>(node)].neighb[i], std::get<1>(node)+1);
+					paths.push(newTup);
+					
+				}
+			}
+		} 
 	}
 }
+
 
 int main(int argc, char *argv[]) {
 	int i;
@@ -245,7 +225,7 @@ int main(int argc, char *argv[]) {
 			for (int i = 0; i < 64; i++) {
 				cubbies[i].used = false;
 			}
-			Alg(*itr);
+			DFS2(*itr);
 		}
 		std::cout << wordCount << std::endl;
 	}
