@@ -3,11 +3,13 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
+#include <stack>
 #include "cube.h"
 
 std::unordered_set<std::string> words;
 struct Cubbie cubbies[64];
 std::unordered_map<char, std::vector<int>> letterMap;
+int wordCout = 0;
 //Cubbie struct:
 //char sym
 //int neighb[26]
@@ -43,7 +45,7 @@ int copyNeighbs(int sheet, int cube, int offset) {
 
 
 void SetNeighbors() {
-	//sorry this feels super hacky but it was fast to implement 
+	//sorry this feels super hacky but my brain won't brain better
 	for (int i = 0; i < 4; i++){
 		for (int j = 0; j < 16; j++) {
 			int offset = copyNeighbs(i,16*i+j,0);
@@ -68,13 +70,13 @@ void SetNeighbors() {
 			}
 		}
 	}
-	for (int i = 0; i < 64; i++) {
+	/*for (int i = 0; i < 64; i++) {
 		std::cout << i << ": ";
 		for (int j = 0; j<26; j++) {
 			std::cout << cubbies[i].neighb[j] << " ";
 		}
 		std::cout << std::endl;
-	}
+	}*/
 }
 
 int ReadCube(FILE *f_c) {
@@ -90,6 +92,52 @@ int ReadCube(FILE *f_c) {
 	return 0;
 }
 
+int DFS(std::string word) {
+	//S is a stack
+	//push all cubes in letterMap.second to S
+	//while S is not empty:
+	//	v = S.pop
+	//	if v.index == word.size()-1
+	//		word is in cube
+	//	if v is not used 
+	//		v = used
+	//		for all n in cubbies[v].neighb
+	//			if n.letter = word[v.index+1] 
+	//				n.index = v.index+1
+	//				S.push(n)
+	std::stack<int> s;
+	std::vector<int>::iterator itr;
+//	std::vector<int> tempVec = letterMap.at(word[0]);
+//	std::cout << tempVec[0] << std::endl;
+
+	for (itr = letterMap.at(word[0]).begin(); itr != letterMap.at(word[0]).end(); itr++) {
+		std::cout << (*itr);
+		cubbies[*itr].index = *itr;
+		s.push(*itr);
+	}
+	while(!s.empty())
+{
+    std::cout << s.top() << " ";
+    s.pop();
+}
+
+	/*if (letterIndex == word.size()-1) {
+		//the word is in the cube
+		wordCount++;
+		return;
+	} else if (cubbies[cube].letter != word[letterIndex]) {
+		//this path does not work
+		return;
+	} else {
+		//this is the letter we want and it is unused:
+		//check all of its neighbors
+		for (int i = 0; i < 26 && cubbies[cube].neighb[i] >= 0; i++) {
+			DFS(word, letterIndex+1; cubbies[cube].neighb[i]);
+		}
+	}*/
+
+}
+
 int main(int argc, char *argv[]) {
 	int i;
 	//set the list of neighbors for each cubbie
@@ -102,13 +150,13 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	
-	char word[50];
-	while(fscanf(f_w, "%s", word) != EOF) {
+	char tempWord[50];
+	while(fscanf(f_w, "%s", tempWord) != EOF) {
 		bool punc = false;
-		for (i=0; i < 50 && word[i] != '\0'; i++) {
-			if (isalpha(word[i])) {
-				char c = word[i];
-				word[i] = tolower(c);
+		for (i=0; i < 50 && tempWord[i] != '\0'; i++) {
+			if (isalpha(tempWord[i])) {
+				char c = tempWord[i];
+				tempWord[i] = tolower(c);
 			} else {
 				//word contains punctuation/numeric character: do not add
 				punc = true;
@@ -117,7 +165,7 @@ int main(int argc, char *argv[]) {
 		}	
 		if (!punc) {
 			//add word to set
-			words.insert(word);
+			words.insert(tempWord);
 		}
 	}
 	fclose(f_w);
@@ -129,9 +177,16 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 	while (ReadCube(f_c) == 0) {
-
-		//do stuff
+		std::unordered_set<std::string>::iterator itr;
+		itr = words.begin();
+		//for (itr = words.begin(); itr != words.end(); itr++)
+		//	std::cout << (*itr) << std::endl;
+		DFS(*itr);
+		//dfs on words
+		//for each node in letterMap[starting letter].second
+		//  DFS(word, 0, node)
 	}
+	fclose(f_c);
 
 
 	return 0;
