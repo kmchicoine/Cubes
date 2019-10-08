@@ -4,6 +4,7 @@
 struct Cubbie {
 	char letter;
 	int index;
+	bool used;
 	int neighb[26] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 		-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 };

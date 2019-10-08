@@ -9,7 +9,7 @@
 std::unordered_set<std::string> words;
 struct Cubbie cubbies[64];
 std::unordered_map<char, std::vector<int>> letterMap;
-int wordCout = 0;
+int wordCount = 0;
 //Cubbie struct:
 //char sym
 //int neighb[26]
@@ -70,7 +70,9 @@ void SetNeighbors() {
 			}
 		}
 	}
-	/*for (int i = 0; i < 64; i++) {
+	/*
+	TODO: make vectors?
+	for (int i = 0; i < 64; i++) {
 		std::cout << i << ": ";
 		for (int j = 0; j<26; j++) {
 			std::cout << cubbies[i].neighb[j] << " ";
@@ -107,19 +109,38 @@ int DFS(std::string word) {
 	//				S.push(n)
 	std::stack<int> s;
 	std::vector<int>::iterator itr;
-//	std::vector<int> tempVec = letterMap.at(word[0]);
-//	std::cout << tempVec[0] << std::endl;
-
-	for (itr = letterMap.at(word[0]).begin(); itr != letterMap.at(word[0]).end(); itr++) {
-		std::cout << (*itr);
+	std::vector<int> tempVec;
+	try {
+		letterMap.at(word[0]);
+	}
+	catch(const std::out_of_range &e) {
+		//first letter of word does not exist in cube
+		return -1;
+	}
+	for (itr = tempVec.begin(); itr != tempVec.end(); itr++) {
 		cubbies[*itr].index = *itr;
 		s.push(*itr);
 	}
-	while(!s.empty())
-{
-    std::cout << s.top() << " ";
-    s.pop();
-}
+	while(!s.empty()) {
+		int v = s.top();
+	    s.pop();
+	    if (cubbies[v].index == word.size()-1) {
+	    	//word has been found in cube
+	    	wordCount++;
+	    	//reset used values?
+	    	return 0;
+	    }
+	    if (cubbies[v].used == false) {
+	    	cubbies[v].used = true;
+	    	for (int i = 0; i < 26 && cubbies[v].neighb[i] != -1; i++) {
+	    		int n = cubbies[v].neighb[i];
+	    		if (cubbies[n].letter == word[cubbies[v].index+1]) {
+	    			cubbies[n].index = cubbies[v].index+1;
+	    			s.push(n);
+	    		} 
+	    	}
+	    }
+	}
 
 	/*if (letterIndex == word.size()-1) {
 		//the word is in the cube
@@ -176,7 +197,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "unable to open cube-file\n";
 		return -1;
 	}
-	while (ReadCube(f_c) == 0) {
+	/*while (ReadCube(f_c) == 0) {
 		std::unordered_set<std::string>::iterator itr;
 		itr = words.begin();
 		//for (itr = words.begin(); itr != words.end(); itr++)
@@ -185,8 +206,16 @@ int main(int argc, char *argv[]) {
 		//dfs on words
 		//for each node in letterMap[starting letter].second
 		//  DFS(word, 0, node)
-	}
+	}*/
+	ReadCube(f_c);
 	fclose(f_c);
+	std::unordered_set<std::string>::iterator itr;
+	for(itr = words.begin(); itr != words.end(); itr++) {
+		DFS(*itr);
+	}
+	std::cout << wordCount << std::endl;
+	
+	
 
 
 	return 0;
