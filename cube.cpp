@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <vector>
 #include <stack>
+#include <forward_list>
+#include <algorithm>
 #include "cube.h"
 
 std::unordered_set<std::string> words;
@@ -70,33 +72,8 @@ void SetNeighbors() {
 			}
 		}
 	}
-	/*for (int i = 0; i < 4; i++){
-		for (int j = 0; j < 16; j++) {
-			int offset = copyNeighbs(i,16*i+j,0);
-			switch(i) {
-				case 0:
-					cubbies[j].neighb[offset] = 16+j;
-					copyNeighbs(1,j,offset+1);
-					break;
-				case 1:
-				case 2:
-					cubbies[16*i+j].neighb[offset] = 16*(i+1)+j;
-					cubbies[16*i+j].neighb[offset+1] = 16*(i-1)+j;
-					copyNeighbs(i+1, 16*i+j, offset+2);
-					copyNeighbs(i-1, 16*i+j, offset*2+2);
-					break;
-				case 3:
-					cubbies[48+j].neighb[offset] = 32+j;
-					copyNeighbs(2,48+j,offset+1);
-					break;
-				default:
-					std::cout << "We've got problems...";
-			}
-		}
-	}
-	
-	TODO: make vectors?
-	for (int i = 0; i < 64; i++) {
+	/*
+		for (int i = 0; i < 64; i++) {
 		std::cout << i << ": ";
 		for (int j = 0; j<cubbies[i].neighb.size(); j++) {
 			std::cout << cubbies[i].neighb[j] << " ";
@@ -116,6 +93,54 @@ int ReadCube(FILE *f_c) {
 		letterMap[letters[i]].push_back(i);
 	}
 	return 0;
+}
+
+void Alg(std::string word) {
+	std::forward_list<std::vector<int>> paths;
+	
+	std::vector<int> tempVec;
+	try {
+		std::vector<int> tempVec(letterMap.at(word[0]));
+	}
+	catch(const std::out_of_range &e) {
+		//first letter of word does not exist in cube
+		return;
+	}
+	std::vector<int>::iterator itr;
+	for (itr = tempVec.begin(); itr != tempVec.end(); itr++) {
+		//push all first letters into paths
+		cubbies[*itr].index = 0;
+		std::vector<int> first(*itr);
+		paths.push_front(first);
+	}
+	for (int w = 0; w < word.size(); w++) {
+		std::forward_list<std::vector<int>>::iterator p;
+		for (p = paths.begin(); p != paths.end(); p++) {
+			//number of paths could change with every iteration of w
+			for (int n = 0; n < cubbies[(*p).back()].neighb.size(); n++) {
+				//check each neighbor of the last node of the path 
+				int ni = cubbies[(*p).back()].neighb[n];
+				if (cubbies[ni].letter = word[w]) {
+					//check if this cubbie has already been used in this path
+					std::vector<int>::iterator it = std::find((*p).begin(), (*p).end(), ni);
+					if (it != (*p).end()) {
+						std::vector<int> newPath(*p);
+						newPath.push_back(ni);
+						paths.push_front(newPath);
+						p++;
+					}
+				} 
+			}
+			
+			paths.remove((*p));
+			p--;
+			//delete p
+			//p = p-1
+		}
+	}
+	if (!paths.empty()) {
+		wordCount++;
+	}
 }
 
 int DFS(std::string word) {
@@ -220,7 +245,7 @@ int main(int argc, char *argv[]) {
 			for (int i = 0; i < 64; i++) {
 				cubbies[i].used = false;
 			}
-			DFS(*itr);
+			Alg(*itr);
 		}
 		std::cout << wordCount << std::endl;
 	}
