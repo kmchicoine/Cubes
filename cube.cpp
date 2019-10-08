@@ -25,10 +25,11 @@ std::unordered_map<char, std::vector<int>> letterMap;
 //environment setup
 //read in files
 //create data structures
+//make neighbor mapping
 
 //TODO:
-//make neighbor mapping
 //dfs on words
+//test against example
 //multithread
 //write real makefile
 //cleanup/make more c++y
@@ -86,22 +87,15 @@ int ReadCube(FILE *f_c) {
 		cubbies[i].letter = letters[i];
 		letterMap[letters[i]].push_back(i);
 	}
-	
-
-	//populate structs:
-	//  update letter in CubbieStruct array x
-	//  add to list of neighbors in map x
-
 	return 0;
 }
 
 int main(int argc, char *argv[]) {
 	int i;
-	
-	//init cube struct: make neighbor list: only needs to be done once
-	//new function: read in cube file: will have to do multiple times, change sym, init used/visited=0
-	// read in word-file
+	//set the list of neighbors for each cubbie
 	SetNeighbors();
+
+	// read in word-file
 	FILE *f_w = fopen(argv[2], "r");
 	if (f_w == NULL) {
 		std::cout << "unable to open word-file\n";
@@ -128,6 +122,7 @@ int main(int argc, char *argv[]) {
 	}
 	fclose(f_w);
 
+	//read in cube-file (as appropriate)
 	FILE *f_c = fopen(argv[1], "r");
 	if (f_c == NULL) {
 		std::cout << "unable to open cube-file\n";
@@ -137,9 +132,6 @@ int main(int argc, char *argv[]) {
 
 		//do stuff
 	}
-
-
-	//read in cube (def should be own func)
 
 
 	return 0;
