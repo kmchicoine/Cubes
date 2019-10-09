@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
-    <generated>
-      <config projectName="ConnectedSignals" targetName="ConnectedSignals" />
-    </generated>
+    <generated />
   </component>
   <component name="CMakeSettings">
     <configurations>
@@ -21,7 +19,6 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="ProjectId" id="1RtbV9gqNXw7dE8nRfGdpBJvBdO" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -38,13 +35,6 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
-    <configuration name="ConnectedSignals" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="ConnectedSignals" TARGET_NAME="ConnectedSignals" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="ConnectedSignals" RUN_TARGET_NAME="ConnectedSignals">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -56,6 +46,7 @@
       <option name="presentableId" value="Default" />
       <updated>1570489360470</updated>
       <workItem from="1570489363048" duration="512000" />
+      <workItem from="1570491209888" duration="169000" />
     </task>
     <servers />
   </component>

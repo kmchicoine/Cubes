@@ -10,7 +10,7 @@
 #include "cube.h"
 
 std::unordered_set<std::string> words;
-struct Cubbie cubbies[64];
+struct Cubie cubbies[64];
 std::unordered_map<char, std::vector<int>> letterMap;
 int wordCount = 0;
 
@@ -134,7 +134,7 @@ void BFS(std::string word) {
 
 void DFS2(std::string word) {
 	std::stack<std::tuple<int, int>> paths;
-	std::vector<int> used;
+	int used[word.size()];
 	std::vector<int> tempVec;
 	try {
 		tempVec = (letterMap.at(word[0]));
@@ -166,7 +166,7 @@ void DFS2(std::string word) {
 					wordCount++;
 					return;
 				}
-				used.push_back(std::get<0>(node));
+				used[std::get<1>(node)] = std::get<0>(node);
 				for (int i = 0; i < cubbies[std::get<0>(node)].neighb.size(); i++) {
 					std::tuple<int,int> newTup = std::make_tuple(cubbies[std::get<0>(node)].neighb[i], std::get<1>(node)+1);
 					paths.push(newTup);

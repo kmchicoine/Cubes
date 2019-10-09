@@ -1,9 +1,8 @@
 #ifndef _CUBE_H_
 #define _CUBE_H_
 
-struct Cubbie {
+struct Cubie {
 	char letter;
-	int index;
 	bool used;
 	std::vector<int> neighb;
 	//int neighb[26] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
