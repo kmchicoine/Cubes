@@ -143,6 +143,10 @@ void DFS2(std::string word) {
 		//first letter of word does not exist in cube
 		return;
 	}
+	if (word.size() == 1) {
+		wordCount++;
+		return;
+	}
 
 	std::vector<int>::iterator itr;
 	for (itr = tempVec.begin(); itr != tempVec.end(); itr++) {
@@ -154,10 +158,8 @@ void DFS2(std::string word) {
 		std::tuple<int,int> node = paths.top();
 		int loc = std::get<0>(node);
 		int let = std::get<1>(node);
-		paths.pop();
+		paths.pop();	
 		
-		
-			
 		used[let] = loc;
 		for (int i = 0; i < cubies[loc].neighb.size(); i++) {
 			int curN = cubies[loc].neighb[i];
@@ -166,6 +168,7 @@ void DFS2(std::string word) {
 				for (int i = 0; i < let+1; i++) {
 					if (used[i] == curN) {
 						alreadyUsed = true;
+						break;
 					}
 				}
 				if (!alreadyUsed) {
@@ -183,7 +186,8 @@ void DFS2(std::string word) {
 
 
 int main(int argc, char *argv[]) {
-	int i;
+	std::vector<int> output;
+	output.reserve(1000);
 	//set the list of neighbors for each cubbie
 	SetNeighbors();
 
@@ -197,7 +201,7 @@ int main(int argc, char *argv[]) {
 	char tempWord[50];
 	while(fscanf(f_w, "%s", tempWord) != EOF) {
 		bool punc = false;
-		for (i=0; i < 50 && tempWord[i] != '\0'; i++) {
+		for (int i=0; i < 50 && tempWord[i] != '\0'; i++) {
 			if (isalpha(tempWord[i])) {
 				char c = tempWord[i];
 				tempWord[i] = tolower(c);
@@ -222,7 +226,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (ReadCube(f_c) == 0){
-	//ReadCube(f_c);
 		wordCount = 0;
 		std::unordered_set<std::string>::iterator itr;
 		for(itr = words.begin(); itr != words.end(); itr++) {
@@ -230,27 +233,14 @@ int main(int argc, char *argv[]) {
 				cubies[i].used = false;
 			}
 			DFS2(*itr);
-			
 		}
 		letterMap.clear();
-		std::cout << wordCount << std::endl;
+		output.push_back(wordCount);
+		//std::cout << wordCount << std::endl;
+	}
+	for (int i = 0; i < output.size(); i++) {
+		std::cout << output[i] << std::endl;
 	}
 	fclose(f_c);
-	
-
-
 	return 0;
 }
-
-	/*std::unordered_set<std::string>::iterator itr;
-	for (itr = words.begin(); itr != words.end(); itr++)
-		std::cout << (*itr) << std::endl;*/
-
-/*std::unordered_map<char, std::vector<int>>::iterator itr;
-	std::vector<int>::iterator itr2;
-	for (itr = letterMap.begin(); itr != letterMap.end(); itr++) {
-		std::cout << itr->first << ": ";
-		for (itr2 = itr->second.begin(); itr2 != itr->second.end(); itr2++)
-			std::cout << (*itr2) << " ";
-	}
-	std::cout << std::endl;*/
