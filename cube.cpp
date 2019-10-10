@@ -152,23 +152,25 @@ void DFS2(std::string word) {
 	}
 	while (!paths.empty()) {
 		std::tuple<int,int> node = paths.top();
+		int loc = std::get<0>(node);
+		int let = std::get<1>(node);
 		paths.pop();
-		if (cubbies[std::get<0>(node)].letter == word[std::get<1>(node)]) {
+		if (cubbies[loc].letter == word[let]) {
 			bool alreadyUsed = false;
-			for (int i = 0; i <= std::get<1>(node)-1; i++) {
-				if (used[i] == std::get<0>(node)) {
+			for (int i = 0; i <= let-1; i++) {
+				if (used[i] == loc) {
 					alreadyUsed = true;
 				}
 			}
 			//std::vector<int>::iterator it = std::find(used.begin(), used[std::get<1>(node)], std::get<0>(node));
 			if (!alreadyUsed) {
-				if (std::get<1>(node) == word.size()-1){
+				if (let == word.size()-1){
 					wordCount++;
 					return;
 				}
-				used[std::get<1>(node)] = std::get<0>(node);
-				for (int i = 0; i < cubbies[std::get<0>(node)].neighb.size(); i++) {
-					std::tuple<int,int> newTup = std::make_tuple(cubbies[std::get<0>(node)].neighb[i], std::get<1>(node)+1);
+				used[let] = loc;
+				for (int i = 0; i < cubbies[loc].neighb.size(); i++) {
+					std::tuple<int,int> newTup = std::make_tuple(cubbies[loc].neighb[i], let+1);
 					paths.push(newTup);
 					
 				}
@@ -226,7 +228,9 @@ int main(int argc, char *argv[]) {
 				cubbies[i].used = false;
 			}
 			DFS2(*itr);
+			
 		}
+		letterMap.clear();
 		std::cout << wordCount << std::endl;
 	}
 	fclose(f_c);
