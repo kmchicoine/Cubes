@@ -10,14 +10,14 @@
 #include "cube.h"
 
 std::unordered_set<std::string> words;
-struct Cubie cubbies[64];
+struct Cubie cubies[64];
 std::unordered_map<char, std::vector<int>> letterMap;
 int wordCount = 0;
 
 int copyNeighbs(int sheet, int cube) {
 	int i;
 	for (i = 0; i < 8 && cub[cube%16][i] >= 0; i++) {
-		cubbies[cube].neighb.push_back(cub[cube%16][i] + (sheet*16));
+		cubies[cube].neighb.push_back(cub[cube%16][i] + (sheet*16));
 	}
 	return i;
 }
@@ -30,18 +30,18 @@ void SetNeighbors() {
 			copyNeighbs(i,16*i+j);
 			switch(i) {
 				case 0:
-					cubbies[j].neighb.push_back(16+j);
+					cubies[j].neighb.push_back(16+j);
 					copyNeighbs(1,j);
 					break;
 				case 1:
 				case 2:
-					cubbies[16*i+j].neighb.push_back(16*(i+1)+j);
-					cubbies[16*i+j].neighb.push_back(16*(i-1)+j);
+					cubies[16*i+j].neighb.push_back(16*(i+1)+j);
+					cubies[16*i+j].neighb.push_back(16*(i-1)+j);
 					copyNeighbs(i+1, 16*i+j);
 					copyNeighbs(i-1, 16*i+j);
 					break;
 				case 3:
-					cubbies[48+j].neighb.push_back(32+j);
+					cubies[48+j].neighb.push_back(32+j);
 					copyNeighbs(2,48+j);
 					break;
 				default:
@@ -52,8 +52,8 @@ void SetNeighbors() {
 	/*
 		for (int i = 0; i < 64; i++) {
 		std::cout << i << ": ";
-		for (int j = 0; j<cubbies[i].neighb.size(); j++) {
-			std::cout << cubbies[i].neighb[j] << " ";
+		for (int j = 0; j<cubies[i].neighb.size(); j++) {
+			std::cout << cubies[i].neighb[j] << " ";
 		}
 		std::cout << std::endl;
 	}*/
@@ -66,7 +66,7 @@ int ReadCube(FILE *f_c) {
 		return 1;
 	}
 	for (int i = 0; i < 64; i++) {
-		cubbies[i].letter = letters[i];
+		cubies[i].letter = letters[i];
 		letterMap[letters[i]].push_back(i);
 	}
 	return 0;
@@ -98,20 +98,20 @@ void BFS(std::string word) {
 		std::list<std::vector<int>>::iterator p;
 		for (auto p = paths.begin(); p != paths.end(); ) {
 			//number of paths could change with every iteration of w
-			//std::cout << cubbies[(*p).back()].neighb.size() << std::endl;
-			int neighbSize = cubbies[(*p).back()].neighb.size();
+			//std::cout << cubies[(*p).back()].neighb.size() << std::endl;
+			int neighbSize = cubies[(*p).back()].neighb.size();
 			for (int n = 0; n < neighbSize; n++) {
 				for (int i = 0; i < (*p).size(); i++)
 					std::cout << (*p)[i] << " ";
 				std::cout << std::endl;
 				//check each neighbor of the last node of the path 
-				int ni = cubbies[(*p).back()].neighb[n];
-				if (cubbies[ni].letter = word[w]) {
+				int ni = cubies[(*p).back()].neighb[n];
+				if (cubies[ni].letter = word[w]) {
 					//check if this cubbie has already been used in this path
 					std::vector<int>::iterator it = std::find((*p).begin(), (*p).end(), ni);
 					if (it == (*p).end()) {
 						std::vector<int> newPath(*p);
-						//add new cubbies to back of path
+						//add new cubies to back of path
 						newPath.push_back(ni);
 						//add new paths to the front of list
 						paths.push_front(newPath);
@@ -155,27 +155,29 @@ void DFS2(std::string word) {
 		int loc = std::get<0>(node);
 		int let = std::get<1>(node);
 		paths.pop();
-		if (cubbies[loc].letter == word[let]) {
-			bool alreadyUsed = false;
-			for (int i = 0; i <= let-1; i++) {
-				if (used[i] == loc) {
-					alreadyUsed = true;
+		
+		
+			
+		used[let] = loc;
+		for (int i = 0; i < cubies[loc].neighb.size(); i++) {
+			int curN = cubies[loc].neighb[i];
+			if (cubies[curN].letter == word[let+1]) {
+				bool alreadyUsed = false;
+				for (int i = 0; i < let+1; i++) {
+					if (used[i] == curN) {
+						alreadyUsed = true;
+					}
 				}
-			}
-			//std::vector<int>::iterator it = std::find(used.begin(), used[std::get<1>(node)], std::get<0>(node));
-			if (!alreadyUsed) {
-				if (let == word.size()-1){
-					wordCount++;
-					return;
-				}
-				used[let] = loc;
-				for (int i = 0; i < cubbies[loc].neighb.size(); i++) {
-					std::tuple<int,int> newTup = std::make_tuple(cubbies[loc].neighb[i], let+1);
+				if (!alreadyUsed) {
+					if (let+1 == word.size()-1){
+						wordCount++;
+						return;
+					}
+					std::tuple<int,int> newTup = std::make_tuple(curN, let+1);
 					paths.push(newTup);
-					
 				}
 			}
-		} 
+		}
 	}
 }
 
@@ -225,7 +227,7 @@ int main(int argc, char *argv[]) {
 		std::unordered_set<std::string>::iterator itr;
 		for(itr = words.begin(); itr != words.end(); itr++) {
 			for (int i = 0; i < 64; i++) {
-				cubbies[i].used = false;
+				cubies[i].used = false;
 			}
 			DFS2(*itr);
 			
