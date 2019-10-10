@@ -143,7 +143,9 @@ void DFS2(std::string word) {
 		//first letter of word does not exist in cube
 		return;
 	}
+
 	if (word.size() == 1) {
+		//word is only one letter, and that letter exists in cube
 		wordCount++;
 		return;
 	}
@@ -161,6 +163,9 @@ void DFS2(std::string word) {
 		paths.pop();	
 		
 		used[let] = loc;
+		//check all neighbors of this (correct) letter:
+		//if any neighbor is a valid option(correct letter
+		//and not yet used), push to paths
 		for (int i = 0; i < cubies[loc].neighb.size(); i++) {
 			int curN = cubies[loc].neighb[i];
 			if (cubies[curN].letter == word[let+1]) {
@@ -173,6 +178,7 @@ void DFS2(std::string word) {
 				}
 				if (!alreadyUsed) {
 					if (let+1 == word.size()-1){
+						//at the end of the word- found a path!
 						wordCount++;
 						return;
 					}
